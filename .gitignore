@@ -1,0 +1,15 @@
+# 凭证 / 敏感文件（千万别提交）
+.gh-config/
+.env
+.env.*
+*.pem
+*.key
+
+# 运行时中间产物
+*.log
+__pycache__/
+*.pyc
+
+# 系统文件
+.DS_Store
+Thumbs.db

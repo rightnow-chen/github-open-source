@@ -101,7 +101,30 @@ gh auth status   # 看 token scopes 是否含 'repo'
 
 ---
 
-## 8. 安全提醒（务必遵守）
+## 8. `gh repo create` / `gh repo view` 报 `Post "https://api.github.com/graphql": EOF`
+
+**症状**：
+```
+Post "https://api.github.com/graphql": EOF
+```
+但 `curl https://api.github.com` 可能返回 `200`。
+
+**根因**：graphql 端点（`gh repo create`/`view` 走 graphql）比普通 REST 端点**对网络抖动更敏感**，代理（sing-box/Clash）不稳定时最容易触发。push 用的是 git 的 HTTPS 协议（走 REST），所以可能"建库失败但推送成功"或反过来。
+
+**解法**：
+1. 先 `curl -s -o /dev/null -w "%{http_code}\n" https://api.github.com` 确认网络恢复（200）；
+2. **直接重试**，多数情况下重试一次就成功；
+3. 若反复失败，换稳定代理节点或退出代理。
+
+**验证推送是否真成功**（绕过 graphql，用 git 判断）：
+```bash
+git status -sb
+# 输出 `## main...origin/main`（无 [ahead N] / [behind N]）→ 本地与远程已同步，推送成功
+```
+
+---
+
+## 9. 安全提醒（务必遵守）
 
 - `GH_CONFIG_DIR` 指向的 `.gh-config` 含 `gho_` 开头的 token，**绝不能进 git 仓库**（加进 `.gitignore` 或放仓库目录外）。
 - 开源前 `git status` 检查一遍，确认没有 `.env`、密钥、私钥、token 等敏感文件被 `git add`。

@@ -162,3 +162,4 @@ git log --oneline -1
 
 - `references/license-templates.md`：MIT / Apache-2.0 / GPL-3.0 许可证全文模板
 - `references/troubleshooting.md`：排错手册（网络、沙箱、认证常见报错）
+- `references/versioning.md`：版本迭代约定（commit 规范 + SemVer + 铁律）

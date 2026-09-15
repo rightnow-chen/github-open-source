@@ -124,7 +124,29 @@ git status -sb
 
 ---
 
-## 9. 安全提醒（务必遵守）
+## 9. `git push` 报 `could not read Username ... terminal prompts disabled`
+
+**症状**：
+```
+fatal: could not read Username for 'https://github.com': terminal prompts disabled
+```
+`gh repo create --push` 能成功（gh 内部带 token），但之后单独 `git push origin main` 失败。
+
+**根因**：git 的 HTTPS 推拉默认要交互式输入用户名密码，但非交互环境禁用了 prompt，且 git 没配置 credential helper 去调用 gh 的 token。
+
+**解法**（让 git 复用 gh 的登录态）：
+```bash
+git config --global credential.helper "!gh auth git-credential"
+```
+（前提：`GH_CONFIG_DIR` 已指向 gh 存 token 的可写目录，且 `gh auth status` 显示已登录。）
+
+配置后再 `git push origin main` 即可，不再提示输入。
+
+**注意**：`gh auth setup-git` 命令在沙箱下可能静默失败（写不进全局 git config），所以**手动 `git config --global credential.helper` 更可靠**。
+
+---
+
+## 10. 安全提醒（务必遵守）
 
 - `GH_CONFIG_DIR` 指向的 `.gh-config` 含 `gho_` 开头的 token，**绝不能进 git 仓库**（加进 `.gitignore` 或放仓库目录外）。
 - 开源前 `git status` 检查一遍，确认没有 `.env`、密钥、私钥、token 等敏感文件被 `git add`。
